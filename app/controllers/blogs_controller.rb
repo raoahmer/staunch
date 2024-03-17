@@ -62,16 +62,25 @@ class BlogsController < ApplicationController
   end
 
   def import
-    file = params[:attachment]
-    data = CSV.parse(file.to_io, headers: true, encoding: 'utf8')
-    # Start code to handle CSV data
-    ActiveRecord::Base.transaction do
-      data.each do |row|
-        current_user.blogs.create!(row.to_h)
+    file = params[:attachment].path
+    blogs_to_import = []
+    batch_size = 1000
+    
+    CSV.foreach(file, headers: true) do |row|
+      blogs_to_import << Blog.new(row.to_h)
+
+      if blogs_to_import.size >= batch_size
+        Blog.import blogs_to_import
+        blogs_to_import.clear
       end
     end
-    # End code to handle CSV data
-    redirect_to blogs_path
+
+    Blog.import blogs_to_import unless blogs_to_import.empty?
+
+    redirect_to blogs_path, notice: 'Blogs imported successfully'
+  rescue StandardError => e
+    Rails.logger.error "Blog import failed: #{e.message}"
+    redirect_to blogs_path, alert: 'Failed to import blogs'
   end
 
   private
