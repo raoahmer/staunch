@@ -1,3 +1,5 @@
+require 'net/http'
+require 'net/https'
 class EmployeeApiService
     BASE_URI = "https://dummy-employees-api-8bad748cda19.herokuapp.com/employees"
   

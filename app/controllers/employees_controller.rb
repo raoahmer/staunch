@@ -1,6 +1,3 @@
-require 'net/http'
-require 'net/https'
-
 class EmployeesController < ApplicationController
   before_action :authenticate_user!
   
@@ -24,7 +21,7 @@ class EmployeesController < ApplicationController
 
   def update
     @employee = EmployeeApiService.update_employee(params[:id], employee_params)
-    redirect_to edit_employee_path(@employee["id"])
+    redirect_to employee_path(@employee["id"])
   end
 
   private
